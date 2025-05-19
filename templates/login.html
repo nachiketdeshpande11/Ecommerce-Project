@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block 'main' %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+<style>
+/* Container split card */
+.card-custom {
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+  border-radius: 15px;
+  max-width: 900px;
+  margin: 40px auto;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.card-left {
+  background: linear-gradient(135deg, #f12711, #f5af19);
+  color: white;
+  padding: 40px 30px;
+  width: 45%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  animation: slideInLeft 1s ease;
+}
+
+.card-left h2 {
+  font-size: 28px;
+  margin-bottom: 15px;
+}
+
+.card-left p {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.card-right {
+  width: 55%;
+  padding: 40px 30px;
+  background: #fff;
+  animation: fadeIn 1s ease;
+}
+
+.login-form-title {
+  color: #e60000;
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+/* Input animation */
+.animated-input {
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  padding: 10px;
+  border: 1px solid #ced4da;
+  width: 100%;
+  font-size: 16px;
+}
+
+.animated-input:focus {
+  border-color: #6f42c1;
+  box-shadow: 0 0 10px rgba(111, 66, 193, 0.4);
+  outline: none;
+}
+
+/* Button hover grow effect */
+.hover-grow {
+  transition: transform 0.3s ease, background-color 0.3s;
+  cursor: pointer;
+}
+
+.hover-grow:hover {
+  transform: scale(1.05);
+  background-color: #c40000;
+}
+
+/* Submit button */
+.login-btn {
+  background-color: #e60000;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: bold;
+  width: 100%;
+  margin-top: 20px;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+/* Link to register */
+.register-link {
+  margin-top: 25px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.register-link a {
+  color: #e60000;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.register-link a:hover {
+  color: #c40000;
+  text-decoration: underline;
+}
+
+/* Animations */
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+</style>
+
+<div class="container">
+  <div class="card card-custom">
+    <div class="card-left">
+      <h2>Welcome Back!</h2>
+      <p>Log in to your account and continue shopping with exclusive offers and deals.</p>
+    </div>
+    <div class="card-right">
+      <h3 class="login-form-title">Login</h3>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %}" role="alert">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+        <div class="mb-3">
+          <input type="text" id="username" name="username" placeholder="Username" class="animated-input" required>
+        </div>
+
+        <div class="mb-3">
+          <input type="password" id="password" name="password" placeholder="Password" class="animated-input" required>
+        </div>
+
+        <button type="submit" class="login-btn hover-grow">Login</button>
+      </form>
+
+      <div class="register-link">
+        <p>Not registered? <a href="{% url 'register' %}">Create an account</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

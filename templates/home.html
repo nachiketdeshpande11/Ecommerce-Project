@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block 'main' %}
+
+<!-- Animate.css -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+<style>
+  .carousel {
+    margin-top: 0px;
+    border-radius: 1px;
+    overflow: hidden;
+  }
+
+  .carousel-item {
+    position: relative;
+  }
+
+  .carousel-item img {
+    width: 100vw;
+    height: 95vh;
+    object-fit: cover; 
+    filter: brightness(70%);
+  }
+
+  .carousel-caption-custom {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    text-align: center;
+    z-index: 10;
+  }
+
+  .carousel-caption-custom h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-shadow: 2px 2px 12px rgba(0, 0, 0, 0.7);
+  }
+
+  .carousel-caption-custom p {
+    font-size: 1.2rem;
+    margin-top: 15px;
+    margin-bottom: 25px;
+    color: #e0e0e0;
+  }
+
+  .btn-shop-now {
+    background: linear-gradient(to right, #ff416c, #ff4b2b);
+    border: none;
+    padding: 14px 32px;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: white;
+    box-shadow: 0 6px 20px rgba(255, 75, 43, 0.4);
+    transition: all 0.3s ease-in-out;
+    text-decoration: none;
+  }
+
+  .btn-shop-now:hover {
+    background: linear-gradient(to right, #ff4b2b, #ff416c);
+    transform: scale(1.05);
+    color: white;
+    text-decoration: none;
+  }
+
+  .carousel-control-prev-icon,
+  .carousel-control-next-icon {
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 50%;
+    padding: 10px;
+    transition: transform 0.3s ease;
+  }
+
+  .carousel-control-prev-icon:hover,
+  .carousel-control-next-icon:hover {
+    transform: scale(1.2);
+  }
+
+  @media (max-width: 768px) {
+    .carousel-caption-custom h1 {
+      font-size: 2rem;
+    }
+
+    .carousel-caption-custom p {
+      font-size: 1rem;
+    }
+
+    .btn-shop-now {
+      padding: 10px 24px;
+      font-size: 0.9rem;
+    }
+
+    .carousel-item img {
+      height: 450px;
+    }
+  }
+</style>
+
+<div id="carouselExampleIndicators" class="carousel slide animate__animated animate__fadeIn" data-bs-ride="carousel">
+  <div class="carousel-indicators">
+    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+  </div>
+
+  <div class="carousel-inner">
+    <div class="carousel-item active">
+      <img src="{% static 'images/ecommerce.png' %}" class="d-block w-100" alt="Ecommerce Image">
+      <div class="carousel-caption-custom">
+        <h1>WELCOME TO ECOMMERCE</h1>
+        <h2>Your Style. Our Mission.</h2>
+        <p>Thousands of trends. One destination. Delivered fast, priced right.</p>
+        <a href="#" class="btn-shop-now">Shop Now</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock 'main' %}

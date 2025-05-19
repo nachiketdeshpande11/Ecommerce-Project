@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block 'main' %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+
+<style>
+  /* Input animation */
+  .animated-input {
+    transition: all 0.3s ease;
+  }
+
+  .animated-input:focus {
+    border-color: #6f42c1;
+    box-shadow: 0 0 10px rgba(111, 66, 193, 0.4);
+  }
+
+  /* Button hover grow effect */
+  .hover-grow {
+    transition: transform 0.3s ease, background-color 0.3s;
+  }
+
+  .hover-grow:hover {
+    transform: scale(1.05);
+    background-color: #e60000
+  }
+
+  /* New layout and card split */
+  .card-custom {
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
+    border-radius: 15px;
+  }
+
+  .card-left {
+    background: linear-gradient(135deg, #f12711, #f5af19);
+    color: white;
+    padding: 30px;
+    width: 45%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    animation: slideInLeft 1s ease;
+  }
+
+  .card-right {
+    width: 55%;
+    padding: 30px;
+    animation: fadeIn 1s ease;
+  }
+
+  .card-left h2 {
+    font-size: 28px;
+  }
+
+  .card-left p {
+    font-size: 15px;
+  }
+
+  /* Login link */
+  .login-link {
+    display: block;
+    margin-top: 20px;
+    text-align: center;
+    color: #e60000;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+
+  .login-link:hover {
+    color: #c40000;
+    text-decoration: underline;
+  }
+
+  /* Animations */
+  @keyframes slideInLeft {
+    from {
+      transform: translateX(-50px);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      transform: scale(0.95);
+      opacity: 0;
+    }
+
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .signup {
+    background-color: #e60000;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    width: 100%;
+    transition: all 0.3s ease;
+  }
+
+  .signup:hover {
+    background-color: #c40000;
+    transform: scale(1.05);
+  }
+</style>
+
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card card-custom shadow">
+        <div class="card-left">
+          <h2>Welcome to Ecommerce!</h2>
+          <p>Join us and get access to the best products, offers and more.</p>
+        </div>
+        <div class="card-right">
+          <h4 class="text-center mb-4" style="color: #e60000;">Create an Account</h4>
+          {% if messages %}
+          {% for message in messages %}
+          <div
+            class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %} alert-dismissible fade show"
+            role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          {% endfor %}
+          {% endif %}
+
+          <form method="POST">
+            {% csrf_token %}
+            <div class="form-floating mb-3">
+              <input type="text" class="form-control animated-input" name="username" placeholder="Username" required>
+              <label for="username">Username</label>
+            </div>
+
+            <div class="form-floating mb-3">
+              <input type="email" class="form-control animated-input" name="email" id="email"
+                placeholder="name@example.com" required>
+              <label for="email">Email address</label>
+            </div>
+
+            <div class="form-floating mb-3">
+              <input type="password" class="form-control animated-input" name="password" id="password"
+                placeholder="Password" required>
+              <label for="password">Password</label>
+            </div>
+
+            <div class="form-floating mb-3">
+              <input type="password" class="form-control animated-input" name="confirmPassword" id="confirmPassword"
+                placeholder="Confirm Password" required>
+              <label for="confirmPassword">Confirm Password</label>
+            </div>
+
+            <button type="submit" class="signup hover-grow">Sign Up</button>
+
+          </form>
+
+          <a href="{% url 'login' %}" class="login-link">Already Registered? Login</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock 'main' %}
