@@ -7,6 +7,7 @@ from django.db import IntegrityError, DatabaseError
 from django.contrib import messages
 from django.shortcuts import redirect
 from .models import Contact
+from django.contrib.auth import authenticate, login,logout
 
 
 # Create your views here.
@@ -66,6 +67,8 @@ class ContactView(View):
     
 import re
 from django.contrib.auth.models import User
+from django.core.mail import send_mail,EmailMessage
+from django.conf import settings
 def register(request):
     if request.method == 'POST':
         try:
@@ -102,6 +105,24 @@ def register(request):
             # Create user
             user = User.objects.create_user(username=username, email=email, password=password)
             user.save()
+
+            # Send email
+            subject = 'Welcome to Our E-commerce Site'
+            message = f'''
+Hi {username},
+Welcome to ECOMMERCE!
+We're excited to have you join our community. Your registration was successful, and your account is now active. You can start exploring our wide range of products and enjoy a seamless shopping experience.
+
+If you have any questions or need assistance, feel free to reach out to our support team.
+Thank you for choosing ECOMMERCE. Happy shopping!
+
+Best regards,
+The ECOMMERCE Team
+            '''
+            from_email = settings.EMAIL_HOST_USER
+            recipient_list = [email]
+            send_mail(subject, message, from_email, recipient_list,fail_silently=False)
+            
             messages.success(request, "Registration successful. You can now log in.")
             return redirect('login')
         except IntegrityError:
@@ -112,5 +133,29 @@ def register(request):
             messages.error(request, f"An unexpected error occurred: {str(e)}")
     return render(request, 'register.html')
 
-def login(request):
+# login view
+from django.contrib.auth import authenticate, login
+def user_login(request):
+    if request.method == 'POST':
+        username = request.POST.get('username').strip()
+        password = request.POST.get('password').strip()
+
+        user = authenticate(username=username, password=password)
+        if user:
+            login(request, user)
+            messages.success(request, "Login successful.")
+            return redirect('/')
+        else:
+            messages.error(request, "Invalid username or password.")
     return render(request, 'login.html')
+
+def user_logout(request):
+    logout(request)
+    messages.success(request, "Logout successful.")
+    return redirect('login')
+
+def category(request):
+    return render(request, 'category.html')
+
+def password_reset(request):
+    return render(request, 'password_reset.html')

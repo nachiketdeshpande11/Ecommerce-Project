@@ -2,10 +2,11 @@
 {% load static %}
 {% block 'main' %}
 
+<!-- Animate.css for animations -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 
 <style>
-/* Container split card */
+/* Card container */
 .card-custom {
   display: flex;
   flex-direction: row;
@@ -52,7 +53,6 @@
   font-weight: 700;
 }
 
-/* Input animation */
 .animated-input {
   transition: all 0.3s ease;
   border-radius: 8px;
@@ -68,7 +68,6 @@
   outline: none;
 }
 
-/* Button hover grow effect */
 .hover-grow {
   transition: transform 0.3s ease, background-color 0.3s;
   cursor: pointer;
@@ -79,7 +78,6 @@
   background-color: #c40000;
 }
 
-/* Submit button */
 .login-btn {
   background-color: #e60000;
   color: white;
@@ -93,7 +91,6 @@
   transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
-/* Link to register */
 .register-link {
   margin-top: 25px;
   text-align: center;
@@ -108,6 +105,23 @@
 
 .register-link a:hover {
   color: #c40000;
+  text-decoration: underline;
+}
+
+.forgot-password-link {
+  text-align: right;
+  margin-top: 5px;
+}
+
+.forgot-password-link a {
+  font-size: 14px;
+  color: #6c757d;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.forgot-password-link a:hover {
+  color: #e60000;
   text-decoration: underline;
 }
 
@@ -133,7 +147,6 @@
     transform: scale(1);
   }
 }
-
 </style>
 
 <div class="container">
@@ -145,22 +158,29 @@
     <div class="card-right">
       <h3 class="login-form-title">Login</h3>
 
+      <!-- Django message framework -->
       {% if messages %}
         {% for message in messages %}
           <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %}" role="alert">
             {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
           </div>
         {% endfor %}
       {% endif %}
 
+      <!-- Login form -->
       <form method="post" action="{% url 'login' %}">
         {% csrf_token %}
+        
         <div class="mb-3">
           <input type="text" id="username" name="username" placeholder="Username" class="animated-input" required>
         </div>
 
         <div class="mb-3">
           <input type="password" id="password" name="password" placeholder="Password" class="animated-input" required>
+          <div class="forgot-password-link">
+            <a href="{% url 'password_reset' %}">Forgot Password?</a>
+          </div>
         </div>
 
         <button type="submit" class="login-btn hover-grow">Login</button>

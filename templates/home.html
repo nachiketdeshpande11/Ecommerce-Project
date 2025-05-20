@@ -3,7 +3,7 @@
 {% block 'main' %}
 
 <!-- Animate.css -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 
 <style>
   .carousel {
@@ -19,7 +19,7 @@
   .carousel-item img {
     width: 100vw;
     height: 95vh;
-    object-fit: cover; 
+    object-fit: cover;
     filter: brightness(70%);
   }
 
@@ -99,10 +99,18 @@
     }
   }
 </style>
-
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %}" role="alert">
+  {{ message }}
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endfor %}
+{% endif %}
 <div id="carouselExampleIndicators" class="carousel slide animate__animated animate__fadeIn" data-bs-ride="carousel">
   <div class="carousel-indicators">
-    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active"
+      aria-current="true" aria-label="Slide 1"></button>
   </div>
 
   <div class="carousel-inner">
@@ -112,7 +120,7 @@
         <h1>WELCOME TO ECOMMERCE</h1>
         <h2>Your Style. Our Mission.</h2>
         <p>Thousands of trends. One destination. Delivered fast, priced right.</p>
-        <a href="#" class="btn-shop-now">Shop Now</a>
+        <a href="/category/" class="btn-shop-now">Shop Now</a>
       </div>
     </div>
   </div>
