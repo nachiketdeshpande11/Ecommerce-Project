@@ -8,6 +8,14 @@ from django.contrib import messages
 from django.shortcuts import redirect
 from .models import Contact
 from django.contrib.auth import authenticate, login,logout
+from django.contrib.auth.models import User
+import re
+from django.conf import settings
+from django.core.mail import send_mail
+import random
+from django.utils.timezone import now
+from datetime import timedelta
+
 
 
 # Create your views here.
@@ -64,11 +72,7 @@ class ContactView(View):
             messages.error(request, f"An unexpected error occurred: {str(e)}")
 
         return render(request, self.template_name)
-    
-import re
-from django.contrib.auth.models import User
-from django.core.mail import send_mail,EmailMessage
-from django.conf import settings
+
 def register(request):
     if request.method == 'POST':
         try:
@@ -77,36 +81,34 @@ def register(request):
             password = request.POST.get('password')
             confirmPassword = request.POST.get('confirmPassword')
 
-            # Validate username
             if not username or not email or not password or not confirmPassword:
                 messages.error(request, "All fields are required.")
                 return render(request, 'register.html')
-            
+
             if password != confirmPassword:
                 messages.error(request, "Passwords do not match.")
                 return render(request, 'register.html')
-            
+
             if len(password) < 8:
                 messages.error(request, "Password must be at least 8 characters long.")
                 return render(request, 'register.html')
-            
+
             if not re.search(r'[A-Za-z]', password) or not re.search(r'[0-9]', password):
                 messages.error(request, "Password must contain both letters and numbers.")
                 return render(request, 'register.html')
-            
+
             if User.objects.filter(username=username).exists():
                 messages.error(request, "Username already exists.")
                 return render(request, 'register.html')
-            
+
             if User.objects.filter(email=email).exists():
                 messages.error(request, "Email already exists.")
                 return render(request, 'register.html')
-            
-            # Create user
+
+
             user = User.objects.create_user(username=username, email=email, password=password)
             user.save()
 
-            # Send email
             subject = 'Welcome to Our E-commerce Site'
             message = f'''
 Hi {username},
@@ -121,16 +123,18 @@ The ECOMMERCE Team
             '''
             from_email = settings.EMAIL_HOST_USER
             recipient_list = [email]
-            send_mail(subject, message, from_email, recipient_list,fail_silently=False)
-            
+            send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+
             messages.success(request, "Registration successful. You can now log in.")
             return redirect('login')
+
         except IntegrityError:
             messages.error(request, "Database error: A duplicate entry might exist.")
         except DatabaseError:
             messages.error(request, "Database error: Please try again later.")
         except Exception as e:
             messages.error(request, f"An unexpected error occurred: {str(e)}")
+
     return render(request, 'register.html')
 
 # login view
@@ -157,5 +161,65 @@ def user_logout(request):
 def category(request):
     return render(request, 'category.html')
 
-def password_reset(request):
-    return render(request, 'password_reset.html')
+
+otp_storage = {}
+def forgot_password(request):
+    if request.method == "POST":
+        email = request.POST.get("email", "").strip().lower()
+
+        try:
+            user = User.objects.get(email=email)
+            otp = random.randint(100000, 999999)
+            otp_storage[email] = {"otp": otp, "time": now()}
+
+            request.session["reset_email"] = email 
+
+            subject = "Password Reset OTP - Ecommerce"
+            message = f"""
+Hello {user.username},
+You requested a password reset. Use the OTP below to proceed:
+
+Your OTP: {otp}
+
+This OTP is valid for 10 minutes.
+
+If you didn't request this, please ignore this email.
+
+Regards,
+Ecommerce Team
+"""
+            send_mail(subject, message, settings.EMAIL_HOST_USER, [email], fail_silently=False)
+            messages.success(request, "OTP has been sent to your email.")
+            return redirect("verify_otp")
+
+        except User.DoesNotExist:
+            messages.error(request, "Email not registered.")
+            return redirect("forgot_password")
+
+    return render(request, "forgot_password.html")
+
+
+def verify_otp(request):
+    if request.method == "POST":
+        email = request.session.get("reset_email", "").strip().lower()
+        otp_entered = request.POST.get("otp")
+
+        if email in otp_storage:
+            otp_data = otp_storage[email]
+
+            if now() - otp_data["time"] > timedelta(minutes=10):
+                del otp_storage[email]
+                messages.error(request, "OTP has expired. Please request a new one.")
+                return redirect("forgot_password")
+
+            if str(otp_entered) == str(otp_data["otp"]):
+                messages.success(request, "OTP verified successfully.")
+                return redirect("/")  
+            else:
+                messages.error(request, "Invalid OTP.")
+                return redirect("verify_otp")
+        else:
+            messages.error(request, "OTP expired or not found. Please try again.")
+            return redirect("forgot_password")
+
+    return render(request, "verify_otp.html")
