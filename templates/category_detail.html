@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block 'main' %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+<style>
+  .product-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+    animation: fadeIn 1s ease;
+  }
+
+  .product-card {
+    display: flex;
+    flex-direction: row;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    max-width: 1000px;
+    width: 100%;
+  }
+
+  .product-left {
+    width: 45%;
+    background: linear-gradient(135deg, #f12711, #f5af19);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .product-left img {
+    width: 100%;
+    height: auto;
+    max-height: 300px;
+    object-fit: contain;
+    border-radius: 8px;
+  }
+
+  .product-right {
+    width: 55%;
+    padding: 30px;
+    background-color: white;
+  }
+
+  .product-right p {
+    margin-bottom: 10px;
+  }
+
+  .product-right strong {
+    color: #e60000;
+  }
+
+  .btn-danger {
+    background-color: #e60000;
+    border: none;
+    margin-right: 10px;
+    transition: background-color 0.3s, transform 0.3s;
+  }
+
+  .btn-danger:hover {
+    background-color: #c40000;
+    transform: scale(1.03);
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
+
+<div class="product-wrapper">
+  <div class="product-card animate__animated animate__fadeInUp">
+    {% for i in data %}
+      <div class="product-left">
+        <img src="{{ i.pimage.url }}" alt="Product Image">
+      </div>
+      <div class="product-right">
+        {% if success %}
+          <div class="alert alert-success" role="alert">
+            {{ success }}
+          </div>
+        {% endif %}
+
+        {% if errmsg %}
+          <div class="alert alert-danger" role="alert">
+            {{ errmsg }}
+          </div>
+        {% endif %}
+
+        <p><strong>Product Name:</strong> {{ i.names }}</p>
+        <p><strong>Category:</strong> {{ i.get_category_display }}</p>
+        <p><strong>Product Detail:</strong> {{ i.description }}</p>
+        <p><strong>Price:</strong> Rs.{{ i.price }}</p>
+        <p>
+          <a href="/addtocart/{{ i.id }}"><button class="btn btn-danger">Add to Cart</button></a>
+          <a href="/cart/"><button class="btn btn-danger">View Cart</button></a>
+          <a href="/category/"><button class="btn btn-danger">Shop More</button></a>
+        </p>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock 'main' %}

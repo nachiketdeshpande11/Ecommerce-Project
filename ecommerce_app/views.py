@@ -6,7 +6,7 @@ from django.utils.decorators import method_decorator
 from django.db import IntegrityError, DatabaseError
 from django.contrib import messages
 from django.shortcuts import redirect
-from .models import Contact
+from .models import Contact, Product, Cart, Order
 from django.contrib.auth import authenticate, login,logout
 from django.contrib.auth.models import User
 import re
@@ -148,7 +148,7 @@ def user_login(request):
         if user:
             login(request, user)
             messages.success(request, "Login successful.")
-            return redirect('/')
+            return redirect('category') 
         else:
             messages.error(request, "Invalid username or password.")
     return render(request, 'login.html')
@@ -157,10 +157,6 @@ def user_logout(request):
     logout(request)
     messages.success(request, "Logout successful.")
     return redirect('login')
-
-def category(request):
-    return render(request, 'category.html')
-
 
 otp_storage = {}
 def forgot_password(request):
@@ -214,7 +210,7 @@ def verify_otp(request):
 
             if str(otp_entered) == str(otp_data["otp"]):
                 messages.success(request, "OTP verified successfully.")
-                return redirect("/")  
+                return redirect("reset_password")  
             else:
                 messages.error(request, "Invalid OTP.")
                 return redirect("verify_otp")
@@ -223,3 +219,152 @@ def verify_otp(request):
             return redirect("forgot_password")
 
     return render(request, "verify_otp.html")
+
+def reset_password(request):
+    if request.method == "POST":
+        email = request.POST.get("email")
+        new_password = request.POST.get("new_password")
+        confirm_password = request.POST.get("confirm_password")
+
+        # Validate form inputs
+        if not email or not new_password or not confirm_password:
+            messages.error(request, "All fields are required!")
+            return redirect("reset_password")
+
+        # Check if passwords match
+        if new_password != confirm_password:
+            messages.error(request, "Passwords do not match!")
+            return redirect("reset_password")
+
+        # Validate password complexity
+        if len(new_password) < 6 or not any(char.isdigit() for char in new_password) or not any(char.isalpha() for char in new_password):
+            messages.error(request, "Password must be at least 6 characters long and contain both letters and numbers.")
+            return redirect("reset_password")
+
+        # Try to find the user by email
+        try:
+            user = User.objects.get(email=email)
+        except User.ObjectDoesNotExist:
+            messages.error(request, "No account found with the provided email.")
+            return redirect("reset_password")
+
+        # Reset the password
+        user.set_password(new_password)
+        user.save()
+
+        # Provide feedback and redirect
+        messages.success(request, "Password reset successful! You can log in now.")
+        return redirect("login")
+
+    return render(request, "reset_password.html")
+
+def category(request):
+    p=Product.objects.filter(is_active=True)
+    context={'data': p}
+    return render(request, 'category.html',context)
+
+def category_detail(request,pid):
+    p=Product.objects.filter(id=pid)
+    # print(p)
+    context = {'data': p}
+    return render(request,'category_detail.html',context)
+
+from django.db.models import Q
+def catfilter(request, cv):
+    q1 = Q(category=cv)
+    q2 = Q(is_active=True)
+    p = Product.objects.filter(q1 & q2)
+    context = {'data': p}
+    return render(request, 'category.html', context)
+
+def sortfilter(request, sv):
+    if sv == "1":
+        t = ('-price')
+    else:
+        t = 'price'
+    p = Product.objects.order_by(t).filter(is_active=True)
+    context = {'data': p}
+    return render(request, 'category.html', context)
+
+def pricefilter(request):
+    mn=request.GET['min']
+    mx=request.GET['max']
+    q1 = Q(price__gte=mn)
+    q2 = Q(price__lte=mx)
+    q3 = Q(is_active=True)
+    p= Product.objects.filter(q1 & q2 & q3)
+    context = {'data': p}
+    return render(request, 'category.html', context)
+
+def srcfilter(request):
+    s = request.GET.get('search', '').strip()
+    alldata = Product.objects.filter(
+        Q(names__icontains=s) | Q(description__icontains=s)
+    ).filter(is_active=True)
+
+    context = {}
+    if not alldata.exists():
+        context['errmsg'] = "Product Not Found"
+    context['data'] = alldata
+    return render(request, 'category.html', context)
+
+def add_to_cart(request, pid):
+    if request.user.is_authenticated:
+        user = request.user
+        product = Product.objects.get(id=pid)
+        cart_item, created = Cart.objects.get_or_create(uid=user, pid=product)
+
+
+        if not created:
+            messages.info(request, "Item already in cart.")
+        else:
+            messages.success(request, "Item added to cart successfully.")
+        return redirect('cart')
+    return redirect('login')
+
+def cart(request):
+    user_cart = Cart.objects.filter(uid=request.user)
+    total_price = sum(item.pid.price * item.qty for item in user_cart)
+
+    return render(request, 'cart.html', {'data': user_cart, 'total_price': total_price,'n': len(user_cart)})
+
+def updateqty(request, x, cid):
+    c = Cart.objects.filter(id=cid)
+    q =c[0].qty
+    if x=='1':
+        q+=1
+    elif q>1:
+        q-=1
+    
+    c.update(qty=q)
+    return redirect('cart')
+
+def remove(request, cid):
+    c = Cart.objects.filter(id=cid)
+    c.delete()
+    return redirect("/cart")
+
+def placeorder(request):
+    c = Cart.objects.filter(uid=request.user)
+    for i in c:
+        a = i.pid.price*i.qty
+        o=Order.objects.create(
+            uid=i.uid,
+            pid=i.pid,
+            qty=i.qty,
+            amt=a
+        )
+        o.save()
+        i.delete()
+    return redirect('fetchorder')
+
+def fetchorder(request):
+    o=Order.objects.filter(uid=request.user)
+    context={}
+    s=0
+    for i in o:
+        s+=i.amt
+    context['data']=o
+    context['total_amount'] = s
+    context['n']=len(o)
+    return render(request, 'placeorder.html', context)

@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block 'main' %}
+
+<div class="row mt-4"><!--main section end or 2nd row end-->
+    <div class="col-md-9"><!--user detail & product detail-->
+
+        <!-- Display messages -->
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <!-- Customer Info -->
+        {% for i in data %}
+            {% if forloop.counter == 1 %}
+            <div class="row mt-2 shadow p-3"><!--customer detail-->
+                <div class="col-md-6">
+                    <h5>Customer Detail</h5>
+                    <p><strong>Customer Name:</strong> {{ i.uid.username }}</p>
+                    <p><strong>Customer Email:</strong> {{ i.uid.email }}</p>
+                </div>
+            </div>
+            {% endif %}
+        {% endfor %}
+
+        <!-- Product Info -->
+        {% for i in data %}
+        <div class="row mt-3 p-3 shadow"><!--Product 1 detail-->
+            <div class="col-md-6"><!--image section-->
+                <img src="{{ i.pid.pimage.url }}" alt="Product Image" height="250px" width="80%">
+            </div>
+            <div class="col-md-6"><!--detail section-->
+                <p><strong>Product Name:</strong> {{ i.pid.names }}</p>
+                
+                {% if i.pid.category == 1 %}
+                    <p><strong>Category:</strong> Mobiles</p>
+                {% elif i.pid.category == 2 %}
+                    <p><strong>Category:</strong> Clothing</p>
+                {% elif i.pid.category == 3 %}
+                    <p><strong>Category:</strong> Home Appliences</p>
+                {% elif i.pid.category == 4 %}
+                    <p><strong>Category:</strong> Shoes</p>
+                {% endif %}
+
+                <p><strong>Product Detail:</strong> {{ i.pid.description }}</p>
+                <p><strong>Price:</strong> Rs. {{ i.pid.price }}</p>
+
+                <p>
+                    <strong>Quantity:</strong>
+                    <a href="/updateqty/0/{{ i.id }}"><button class="btn btn-danger">-</button></a>
+                    <input type="text" value="{{ i.qty }}">
+                    <a href="/updateqty/1/{{ i.id }}"><button class="btn btn-danger">+</button></a>
+                </p>
+                <p>
+                    <a href="/remove/{{ i.id }}"><button class="btn btn-danger">Remove</button></a>
+                </p>
+            </div>
+        </div>
+        {% endfor %}   
+    </div>
+    <div class="col-md-3 mt-2">
+        <div class="p-3 shadow">
+            <h5>Price Detail</h5>
+            <p><strong>Price ({{n}} items): </strong>Rs. {{total_price}}</p>
+            <p><strong>Total Price: </strong>Rs. {{total_price}}</p>
+            <p><a href="/placeholder/"><button class="btn btn-danger">Place Order</button></a></p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

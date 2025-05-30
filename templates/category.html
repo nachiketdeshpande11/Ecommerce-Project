@@ -1,17 +1,178 @@
 {% extends 'base.html' %}
 {% load static %}
+{% block 'main' %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 
-{% block main %}
+<style>
+    .filter-sidebar {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+        animation: fadeIn 1s ease;
+    }
 
+    .filter-sidebar h5 {
+        font-weight: 700;
+        color: #f12711;
+        margin-bottom: 10px;
+    }
 
+    .list-group-item.active,
+    .list-group-item:hover {
+        background-color: #f12711;
+        color: white;
+        border-color: #f12711;
+    }
+
+    .list-group-item a {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .card {
+        border-radius: 12px;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s ease;
+        height: 100%;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+    }
+
+    .card-title {
+        font-weight: 600;
+        font-size: 18px;
+    }
+
+    .product-price {
+        color: #28a745;
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    .btn-primary {
+        background-color: #f12711;
+        border: none;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: #c40000;
+        transform: scale(1.03);
+    }
+
+    .alert {
+        animation: fadeIn 0.6s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
 {% if messages %}
 {% for message in messages %}
-<div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %}" role="alert">
+<div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %} alert-dismissible fade show"
+    role="alert">
     {{ message }}
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 {% endfor %}
 {% endif %}
+<div class="row mt-4 p-3">
+    <!-- Sidebar -->
+    <div class="col-md-3">
+        <div class="filter-sidebar animate__animated animate__fadeInLeft">
+            <h5>Filter By Category</h5>
+            <hr>
+            <ul class="list-group">
+                <li class="list-group-item {% if request.path == '/category/' %}active{% endif %}">
+                    <a href="/category/">All</a>
+                </li>
+                <li class="list-group-item {% if request.path == '/catfilter/1' %}active{% endif %}">
+                    <a href="/catfilter/1">Mobiles</a>
+                </li>
+                <li class="list-group-item {% if request.path == '/catfilter/2' %}active{% endif %}">
+                    <a href="/catfilter/2">Clothing</a>
+                </li>
+                <li class="list-group-item {% if request.path == '/catfilter/3' %}active{% endif %}">
+                    <a href="/catfilter/3">Home Appliances</a>
+                </li>
+                <li class="list-group-item {% if request.path == '/catfilter/4' %}active{% endif %}">
+                    <a href="/catfilter/4">Shoes</a>
+                </li>
+            </ul>
 
+            <br>
+            <h5>Filter by Price</h5>
+            <hr>
+            <form action="/pricefilter" method="get" class="border p-3 rounded bg-light">
+                <div class="mb-2">
+                    <label for="input1" class="form-label fw-semibold">Min Price</label>
+                    <input type="number" name="min" class="form-control" id="input1" placeholder="Enter minimum price"
+                        required>
+                </div>
+                <div class="mb-2">
+                    <label for="input2" class="form-label fw-semibold">Max Price</label>
+                    <input type="number" name="max" class="form-control" id="input2" placeholder="Enter maximum price"
+                        required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+            </form>
+
+            <br>
+            <h5>Sort By Price</h5>
+            <hr>
+            <ul class="list-group">
+                <li class="list-group-item {% if request.path == '/sortfilter/1' %}active{% endif %}">
+                    <a href="/sortfilter/1">High to Low</a>
+                </li>
+                <li class="list-group-item {% if request.path == '/sortfilter/0' %}active{% endif %}">
+                    <a href="/sortfilter/0">Low to High</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Product List Section -->
+    <div class="col-md-9">
+        {% if errmsg %}
+        <div class="alert alert-danger text-center" role="alert">
+            {{ errmsg }}
+        </div>
+        {% endif %}
+
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4 animate__animated animate__fadeInUp">
+            {% for i in data %}
+            <div class="col">
+                <div class="card h-100">
+                    {% if i.pimage %}
+                    <img src="{{ i.pimage.url }}" class="card-img-top" alt="Product Image"
+                        style="height: 200px; object-fit: cover;">
+                    {% else %}
+                    <img src="{% static 'default.jpg' %}" class="card-img-top" alt="Default Image"
+                        style="height: 200px; object-fit: cover;">
+                    {% endif %}
+
+                    <div class="card-body text-center d-flex flex-column">
+                        <h5 class="card-title">{{ i.names }}</h5>
+                        <p class="product-price">Rs. {{ i.price }}</p>
+                        <a href="/product_detail/{{ i.id }}" class="btn btn-primary w-100 mt-auto">See Details</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
 
 {% endblock %}
