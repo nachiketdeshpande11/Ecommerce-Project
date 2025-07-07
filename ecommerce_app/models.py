@@ -44,6 +44,7 @@ class Order(models.Model):
     pid = models.ForeignKey(Product, on_delete=models.CASCADE, db_column='pid')
     qty = models.IntegerField(default=1)
     amt = models.DecimalField(max_digits=10, decimal_places=2)
+
     
     def __str__(self):
         return f"Order by {self.uid.username} for {self.pid.names} ({self.qty})"

@@ -15,7 +15,7 @@ from django.core.mail import send_mail
 import random
 from django.utils.timezone import now
 from datetime import timedelta
-
+import razorpay
 
 
 # Create your views here.
@@ -347,24 +347,68 @@ def remove(request, cid):
 def placeorder(request):
     c = Cart.objects.filter(uid=request.user)
     for i in c:
-        a = i.pid.price*i.qty
-        o=Order.objects.create(
+        a = i.pid.price * i.qty
+        Order.objects.create(
             uid=i.uid,
             pid=i.pid,
             qty=i.qty,
             amt=a
         )
-        o.save()
         i.delete()
-    return redirect('fetchorder')
+    return redirect('/fetchorder')
 
 def fetchorder(request):
-    o=Order.objects.filter(uid=request.user)
-    context={}
-    s=0
+    o = Order.objects.filter(uid=request.user)
+    total = 0
     for i in o:
-        s+=i.amt
-    context['data']=o
-    context['total_amount'] = s
-    context['n']=len(o)
+        i.total_price = i.amt  # add total_price dynamically
+        total += i.amt
+
+    context = {
+        'data': o,
+        'total_price': total,
+        'n': len(o)
+    }
     return render(request, 'placeorder.html', context)
+
+def makepayment(request):
+    client = razorpay.Client(auth=("rzp_test_Yvtr8lSQOz33GV", "84ik4ac3MjNimAwqIuwgp1EH"))
+
+    total_amount = sum(float(order.amt) for order in Order.objects.filter(uid=request.user.id))
+    amount_in_paise = int(total_amount * 100)
+
+    payment = client.order.create({
+        "amount": amount_in_paise,
+        "currency": "INR",
+        "receipt": "order_rcptid_11"
+    })
+
+    return render(request, "pay.html", {"payment": payment})
+
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponseBadRequest
+@csrf_exempt
+def paymenthandler(request):
+    if request.method == "POST":
+        try:
+            client = razorpay.Client(auth=("rzp_test_Yvtr8lSQOz33GV", "84ik4ac3MjNimAwqIuwgp1EH"))
+            params_dict = {
+                'razorpay_payment_id': request.POST['razorpay_payment_id'],
+                'razorpay_order_id': request.POST['razorpay_order_id'],
+                'razorpay_signature': request.POST['razorpay_signature']
+            }
+
+            client.utility.verify_payment_signature(params_dict)
+
+            # Optionally mark order as paid here
+            return redirect('/paymentsuccess')
+
+        except razorpay.errors.SignatureVerificationError:
+            return HttpResponseBadRequest("Payment Failed")
+    else:
+        return HttpResponseBadRequest("Invalid Request")
+
+
+def paymentsuccess(request):
+    total_amount = sum(order.amt for order in Order.objects.filter(uid=request.user.id))
+    return render(request, "paymentsuccess.html", {"total_amount": total_amount})

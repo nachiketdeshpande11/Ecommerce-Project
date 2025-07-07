@@ -1,6 +1,56 @@
 {% extends 'base.html' %}
 {% load static %}
-
 {% block 'main' %}
+
+<div class="row mt-4">
+    <div class="col-md-9">
+        {% for i in data %}
+        {% if forloop.first %}
+        <div class="row mt-2 shadow p-3">
+            <h5>Customer Detail</h5>
+            <hr>
+            <p><strong>Customer Name:</strong> {{ i.uid.username }}</p>
+            <p><strong>Customer Email:</strong> {{ i.uid.email }}</p>
+        </div>
+        {% endif %}
+        {% endfor %}
+
+        <div class="row bg-danger text-white mt-2 p-2">
+            <h4>ORDER SUMMARY</h4>
+        </div>
+
+        {% for i in data %}
+        <div class="row mt-3 p-3 shadow">
+            <div class="col-md-6">
+                <img src="{{ i.pid.pimage.url }}" alt=".." height="250px" width="80%">
+            </div>
+            <div class="col-md-6">
+                <p><strong>Product Name:</strong> {{ i.pid.names }}</p>
+                {% if i.pid.category == 1 %}
+                    <p><strong>Category:</strong> Mobile</p>
+                {% elif i.pid.category == 2 %}
+                    <p><strong>Category:</strong> Shoes</p>
+                {% else %}
+                    <p><strong>Category:</strong> Cloth</p>
+                {% endif %}
+                <p><strong>Product Detail:</strong> {{ i.pid.description }}</p>
+                <p><strong>Price (per item):</strong> Rs. {{ i.pid.price }}</p>
+                <p><strong>Quantity:</strong> {{ i.qty }}</p>
+                <p><strong>Total Amount:</strong> Rs. {{ i.amt }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="col-md-3 mt-2">
+        <div class="p-3 shadow">
+            <h5>Price Detail</h5>
+            <hr>
+            <p><strong>Price ({{ n }} items):</strong> Rs. {{ total_price }}</p>
+            <p><strong>Total Price:</strong> Rs. {{ total_price }}</p>
+            <p><a href="/makepayment"><button class="btn btn-danger">Payment</button></a></p>
+        </div>
+    </div>
+</div>
 
 {% endblock %}

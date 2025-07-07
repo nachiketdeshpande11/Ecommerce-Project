@@ -137,3 +137,6 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True # Use TLS for security
 EMAIL_HOST_USER = 'nachiketdeshpande.1103@gmail.com'
 EMAIL_HOST_PASSWORD = 'bpbd hdil fnom ojaz'  # Use environment variables for security 
+
+RAZORPAY_API_KEY='rzp_test_Yvtr8lSQOz33GV'
+RAZORPAY_API_SECRET_KEY='84ik4ac3MjNimAwqIuwgp1EH'
